@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>韭菜修真院 · 功德无量版</title>
+    <style>
+        :root {
+            /* 玄学色板 */
+            --paper-bg: #F0E6D2;
+            --paper-texture: #E6DBC4;
+            --cinnabar: #C44238;
+            --ink-black: #2B2B2B;
+            --tao-gold: #D4AF37;
+            --jade-green: #3E6B56;
+            
+            /* 边框风格 */
+            --border-style: 2px solid var(--ink-black);
+            --border-double: 4px double var(--ink-black);
+            
+            /* 阴影 */
+            --shadow-float: 4px 4px 0px rgba(43, 43, 43, 0.2);
+        }
+
+        @font-face {
+            font-family: 'ZenFont';
+            src: local("KaiTi"), local("STKaiti"), local("SimSun"), serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--paper-bg);
+            background-image: radial-gradient(var(--paper-texture) 1px, transparent 1px);
+            background-size: 10px 10px;
+            color: var(--ink-black);
+            font-family: 'ZenFont', serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- 背景八卦装饰 --- */
+        .bagua-bg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80vw; height: 80vw;
+            border: 20px solid rgba(0,0,0,0.03);
+            border-radius: 50%;
+            z-index: -1;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bagua-bg::after {
+            content: "☯";
+            font-size: 150px;
+            opacity: 0.05;
+            animation: rotate 60s linear infinite;
+        }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+
+        /* --- 顶部牌匾 --- */
+        header {
+            padding: 30px 20px 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .plaque {
+            border: var(--border-double);
+            display: inline-block;
+            padding: 8px 24px;
+            background: var(--cinnabar);
+            color: #FFD700;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: var(--shadow-float);
+            letter-spacing: 4px;
+            border-radius: 4px;
+        }
+        
+        .sub-plaque {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--ink-black);
+            opacity: 0.7;
+            font-style: italic;
+        }
+
+        /* --- 主道场 --- */
+        main {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding-bottom: 60px;
+        }
+
+        /* 通用符箓卡片 */
+        .talisman-card {
+            background: #FFFBF0;
+            border: var(--border-style);
+            padding: 20px;
+            position: relative;
+            box-shadow: var(--shadow-float);
+        }
+        
+        /* 四角装饰 */
+        .corner {
+            position: absolute;
+            width: 10px; height: 10px;
+            border: 2px solid var(--cinnabar);
+        }
+        .tl { top: 4px; left: 4px; border-right: none; border-bottom: none; }
+        .tr { top: 4px; right: 4px; border-left: none; border-bottom: none; }
+        .bl { bottom: 4px; left: 4px; border-right: none; border-top: none; }
+        .br { bottom: 4px; right: 4px; border-left: none; border-top: none; }
+
+        /* 1. 功德木鱼 (强化交互区域) */
+        .muyu-section {
+            text-align: center;
+            padding: 20px 0;
+            background: radial-gradient(circle, #EFE5D0 0%, #FFFBF0 100%);
+            cursor: pointer; /* 鼠标变为手型 */
+            overflow: hidden; /* 防止文字溢出 */
+        }
+
+        .muyu-icon {
+            font-size: 60px;
+            color: var(--ink-black);
+            filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.1));
+            transition: transform 0.05s ease-out; /* 极速响应 */
+            display: inline-block;
+        }
+        
+        .merit-counter {
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: bold;
+            color: var(--cinnabar);
+            border-bottom: 1px solid var(--cinnabar);
+            display: inline-block;
+        }
+
+        /* 功德+1 粒子动画 */
+        .merit-particle {
+            position: absolute;
+            color: var(--cinnabar);
+            font-weight: bold;
+            font-size: 20px;
+            pointer-events: none; /* 不阻挡点击 */
+            animation: floatUpFade 0.8s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes floatUpFade {
+            0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+            20% { transform: translate(-50%, -20px) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -80px) scale(1); opacity: 0; }
+        }
+
+        /* 2. 历劫推演 */
+        .divination-box h3, .fortune-box h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            text-align: center;
+            border-bottom: 1px dashed var(--ink-black);
+            padding-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        .val-red { color: var(--cinnabar); font-weight: bold; }
+        .val-green { color: var(--jade-green); font-weight: bold; }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            margin: 15px 0;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            background: var(--ink-black);
+            border-radius: 2px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px; width: 28px;
+            border-radius: 50%;
+            background: #D4AF37;
+            border: 2px solid #5A4A1B;
+            margin-top: -12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .oracle-text {
+            background: rgba(196, 66, 56, 0.05);
+            color: var(--ink-black);
+            padding: 15px;
+            font-size: 15px;
+            text-align: justify;
+            border: 1px solid var(--cinnabar);
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        /* 3. 灵签求运 */
+        .fortune-container {
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qiantong {
+            font-size: 80px;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.2s;
+        }
+        
+        .shake-anim {
+            animation: shakeHard 0.5s cubic-bezier(.36,.07,.19,.97) infinite;
+        }
+
+        @keyframes shakeHard {
+            10%, 90% { transform: translate3d(-2px, 0, 0) rotate(-5deg); }
+            20%, 80% { transform: translate3d(4px, 0, 0) rotate(5deg); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0) rotate(-10deg); }
+            40%, 60% { transform: translate3d(8px, 0, 0) rotate(10deg); }
+        }
+
+        .fortune-paper {
+            display: none;
+            margin-top: 20px;
+            width: 80%;
+            background: #FFF;
+            border: 2px solid var(--cinnabar);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            padding: 15px;
+            animation: slideDown 0.5s ease-out;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fortune-level {
+            writing-mode: vertical-rl;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--cinnabar);
+            border-left: 2px double var(--cinnabar);
+            padding-left: 10px;
+            height: 120px;
+            float: right;
+            margin-left: 15px;
+            letter-spacing: 5px;
+        }
+        .fortune-poem { font-size: 18px; font-weight: bold; color: var(--ink-black); margin-bottom: 10px; text-align: left; }
+        .fortune-desc { font-size: 14px; color: #666; text-align: left; line-height: 1.5; border-top: 1px dashed #ccc; padding-top: 10px; }
+
+        /* 底部经文 */
+        .sutra-scroll {
+            position: fixed;
+            bottom: 0; left: 0; width: 100%;
+            background: var(--ink-black);
+            color: #D4AF37;
+            padding: 8px 0;
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            border-top: 2px solid #D4AF37;
+            z-index: 10;
+        }
+        .sutra-content {
+            display: inline-block;
+            animation: scrollText 20s linear infinite;
+        }
+        @keyframes scrollText {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="bagua-bg"></div>
+
+    <header>
+        <div class="plaque">修真渡劫院</div>
+        <div class="sub-plaque">「 贫道夜观天象，今日诸事不宜 」</div>
+    </header>
+
+    <main>
+        <!-- 1. 电子木鱼 (交互升级) -->
+        <div class="talisman-card muyu-section" id="muyu-btn">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            
+            <div class="muyu-icon" id="fish-icon">🐟</div>
+            <div class="merit-counter" id="score">功德：0</div>
+            <div style="font-size:12px; margin-top:5px; opacity:0.6">点击敲击 · 积攒阳气</div>
+        </div>
+
+        <!-- 2. 历劫推演 -->
+        <div class="talisman-card divination-box">
+            <h3>☯ 九九归一 · 历劫推演 ☯</h3>
+            
+            <div class="result-row">
+                <div><div style="font-size:12px; opacity:0.6">当前劫数</div><div class="val-green" id="loss-val">-10%</div></div>
+                <div style="text-align: right;"><div style="font-size:12px; opacity:0.6">飞升需涨</div><div class="val-red" id="gain-val">11%</div></div>
+            </div>
+
+            <input type="range" min="1" max="99" value="10" id="loss-slider">
+            
+            <div class="oracle-text" id="oracle-box">
+                <strong style="color:var(--cinnabar)" id="oracle-title">卦象：小耗</strong><br>
+                <span id="oracle-content">此乃命中一劫，吃顿素斋便可化解。</span>
+            </div>
+        </div>
+
+        <!-- 3. 灵签求运 -->
+        <div class="talisman-card fortune-box">
+            <div class="corner tl"></div><div class="corner tr"></div>
+            <div class="corner bl"></div><div class="corner br"></div>
+            
+            <h3>🧧 灵签问吉凶 🧧</h3>
+            
+            <div class="fortune-container">
+                <div class="qiantong" id="qiantong-btn">🎋</div>
+                <div style="font-size:12px; margin-top:10px; color:#666;" id="qiantong-tip">点击签筒，摇动求签</div>
+
+                <div class="fortune-paper" id="fortune-result">
+                    <div class="fortune-level" id="f-level">上上签</div>
+                    <div class="fortune-poem" id="f-poem">枯木逢春</div>
+                    <div class="fortune-desc" id="f-desc">施主鸿运当头，手中废纸或将变废为宝，切记拿住，莫要下车。</div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div class="sutra-scroll">
+        <div class="sutra-content">
+            🙏 股市有风险，入市需谨慎 🙏 色即是空，空即是色，跌即是涨，涨即是跌 🙏 施主，回头是岸，苦海无边 🙏 
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 木鱼交互核心逻辑 (增强版) ---
+        const muyuBtn = document.getElementById('muyu-btn');
+        const fishIcon = document.getElementById('fish-icon');
+        const scoreEl = document.getElementById('score');
+        let merit = 0;
+
+        // 生成简易木鱼音效 (使用 Web Audio API，无需外链)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playWoodBlockSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime); // 基础频率
+            osc.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1); // 频率快速下降
+            
+            gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15); // 音量快速衰减
+
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+        }
+
+        muyuBtn.addEventListener('mousedown', handleMuyuTap);
+        muyuBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // 防止双击缩放
+            handleMuyuTap();
+        });
+
+        function handleMuyuTap() {
+            merit++;
+            scoreEl.innerText = `功德：${merit}`;
+            
+            // 1. 视觉缩放 (CSS Transform)
+            fishIcon.style.transform = "scale(0.85)";
+            setTimeout(() => fishIcon.style.transform = "scale(1)", 80);
+
+            // 2. 触觉震动 (Haptics)
+            if(navigator.vibrate) navigator.vibrate(15);
+
+            // 3. 听觉音效
+            playWoodBlockSound();
+
+            // 4. 飘字动画 (Visual Particle)
+            createMeritParticle();
+        }
+
+        function createMeritParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'merit-particle';
+            particle.innerText = "功德+1";
+            
+            // 随机微调位置
+            const randomX = (Math.random() - 0.5) * 40;
+            particle.style.left = `calc(50% + ${randomX}px)`;
+            particle.style.top = "40%";
+            
+            muyuBtn.appendChild(particle);
+
+            // 动画结束后移除元素
+            setTimeout(() => {
+                particle.remove();
+            }, 800);
+        }
+
+        // --- 2. 历劫推演逻辑 ---
+        const divinations = [
+            { limit: 10, gua: "卦象：小耗", desc: "皮外伤，少喝两杯奶茶可解。" },
+            { limit: 20, gua: "卦象：坎卦", desc: "行路难，切忌妄动，闭关锁仓。" },
+            { limit: 30, gua: "卦象：困卦", desc: "深陷泥潭，唯有装死一法可保全。" },
+            { limit: 40, gua: "卦象：剥卦", desc: "剥皮削骨，不如去深山老林喊两嗓子。" },
+            { limit: 50, gua: "卦象：大过", desc: "天劫腰斩，想要回本难如登天。" },
+            { limit: 60, gua: "卦象：损卦", desc: "损下益上，你的钱都补了庄家的天。" },
+            { limit: 80, gua: "卦象：明夷", desc: "暗无天日，否极泰来在下个世纪。" },
+            { limit: 99, gua: "卦象：涅槃", desc: "九九归一，建议销户重修，立地成佛。" }
+        ];
+
+        const slider = document.getElementById('loss-slider');
+        const lossVal = document.getElementById('loss-val');
+        const gainVal = document.getElementById('gain-val');
+        const oracleTitle = document.getElementById('oracle-title');
+        const oracleContent = document.getElementById('oracle-content');
+
+        function updateDivination() {
+            const loss = parseInt(slider.value);
+            lossVal.innerText = `-${loss}%`;
+            let gain = (loss / (100 - loss)) * 100;
+            gainVal.innerText = gain > 9900 ? "∞" : Math.round(gain) + "%";
+
+            let current = divinations[divinations.length - 1];
+            for (let item of divinations) {
+                if (loss <= item.limit) { current = item; break; }
+            }
+            oracleTitle.innerText = current.gua;
+            oracleContent.innerText = current.desc;
+        }
+        slider.addEventListener('input', updateDivination);
+        updateDivination();
+
+        // --- 3. 灵签逻辑 ---
+        const fortuneData = [
+            { level: "上上签", poem: "枯木逢春", desc: "枯木逢春犹再发，施主手中废纸或将变废为宝，切记拿住，莫要下车。" },
+            { level: "上吉", poem: "紫气东来", desc: "主力资金隐隐若现，似有抬轿之意，这波能不能飞升，全看造化。" },
+            { level: "中平", poem: "静观其变", desc: "敌不动我不动，敌若动我乱动。目前局势不明，建议施主回家睡觉。" },
+            { level: "下下签", poem: "天雷滚滚", desc: "大凶之兆！印堂发黑，近日忌看盘，忌补仓，宜卸载软件保平安。" },
+            { level: "下签", poem: "关灯吃面", desc: "今日大概率又是随礼的一天，记得多放葱花，少放眼泪。" },
+            { level: "中吉", poem: "否极泰来", desc: "跌无可跌，也就是涨的开始。虽然现在很难受，但万一反弹了呢？" },
+            { level: "神签", poem: "相信国运", desc: "别问，问就是相信光。只要你活得够久，总能等到回本的那一天。" }
+        ];
+
+        const qiantongBtn = document.getElementById('qiantong-btn');
+        const fortuneResult = document.getElementById('fortune-result');
+        const qiantongTip = document.getElementById('qiantong-tip');
+        let isShaking = false;
+
+        qiantongBtn.addEventListener('click', () => {
+            if(isShaking) return;
+            isShaking = true;
+            
+            fortuneResult.style.display = 'none';
+            qiantongTip.innerText = "诚心祷告，灵签摇动中...";
+            qiantongBtn.classList.add('shake-anim');
+            if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 100]);
+
+            setTimeout(() => {
+                qiantongBtn.classList.remove('shake-anim');
+                const fortune = fortuneData[Math.floor(Math.random() * fortuneData.length)];
+                document.getElementById('f-level').innerText = fortune.level;
+                document.getElementById('f-poem').innerText = fortune.poem;
+                document.getElementById('f-desc').innerText = fortune.desc;
+                fortuneResult.style.display = 'block';
+                qiantongTip.innerText = "点击签筒，再求一签";
+                isShaking = false;
+            }, 1500);
+        });
+
+    </script>
+</body>
+</html>
+
+
