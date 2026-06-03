@@ -1,18 +1,26 @@
 <template>
   <view class="app-page">
-    <!-- 顶部红色导航栏 -->
-    <view class="header">
-      <view class="header-top">
-        <text class="header-title">韭菜修真院</text>
-      </view>
+    <!-- 八卦背景装饰 -->
+    <view class="bagua-bg">
+      <text class="bagua-icon">☯</text>
     </view>
 
-    <!-- 主内容区 -->
+    <!-- 主内容区 - 整屏滚动 -->
     <scroll-view scroll-y class="main-scroll">
-      <!-- 1. 功德木鱼 - 点击区域扩大 -->
-      <view class="section-card merit-section" @tap="handleMuyuTap">
+      <!-- 顶部牌匾 -->
+      <view class="header">
+        <view class="plaque">修真渡劫院</view>
+        <text class="sub-plaque">「 贫道夜观天象，今日诸事不宜 」</text>
+      </view>
+      <!-- 1. 功德木鱼 -->
+      <view class="talisman-card muyu-section" @tap="handleMuyuTap">
+        <view class="corner tl"></view>
+        <view class="corner tr"></view>
+        <view class="corner bl"></view>
+        <view class="corner br"></view>
+
         <view class="merit-header">
-          <view class="merit-left">
+          <view class="merit-info">
             <text class="merit-label">我的功德</text>
             <view class="merit-value-row">
               <text class="merit-value">{{ merit }}</text>
@@ -28,100 +36,85 @@
           />
         </view>
         <!-- 大弹幕飘字 -->
-        <view v-for="p in meritParticles" :key="p.id" class="big-float" :style="{ left: p.x + 'px', top: p.y + 'px' }">
+        <view v-for="p in meritParticles" :key="p.id" class="merit-particle" :style="{ left: p.x + 'px', top: p.y + 'px' }">
           功德+1
         </view>
-        <text class="tap-hint">点击卡片积攒功德</text>
+        <text class="tap-hint">点击敲击 · 积攒阳气</text>
       </view>
 
-      <!-- 2. 回本计算器 - 类似行情数据展示 -->
-      <view class="section-card">
-        <view class="card-title-bar">
-          <text class="card-title">📈 回本计算器</text>
+      <!-- 2. 历劫推演 (回本计算器) -->
+      <view class="talisman-card">
+        <view class="card-title">☯ 九九归一 · 历劫推演 ☯</view>
+
+        <view class="result-row">
+          <view class="result-item">
+            <text class="result-label">当前劫数</text>
+            <text class="result-val val-green">-{{ lossValue }}%</text>
+          </view>
+          <view class="result-item">
+            <text class="result-label">飞升需涨</text>
+            <text class="result-val val-red">{{ gainDisplay }}</text>
+          </view>
         </view>
 
-        <view class="calc-box">
-          <view class="calc-row">
-            <view class="calc-item">
-              <text class="calc-label">当前亏损</text>
-              <text class="calc-num down">-{{ lossValue }}%</text>
-            </view>
-            <view class="calc-arrow">
-              <text class="arrow-line"></text>
-              <text class="arrow-text">回本需涨</text>
-              <text class="arrow-line"></text>
-            </view>
-            <view class="calc-item">
-              <text class="calc-label">需要涨幅</text>
-              <text class="calc-num up">{{ gainDisplay }}</text>
-            </view>
-          </view>
+        <view class="slider-wrap">
+          <slider
+            :min="1"
+            :max="99"
+            :value="lossValue"
+            :block-size="24"
+            active-color="#D4AF37"
+            background-color="#2B2B2B"
+            @changing="onSliderChange"
+          />
+        </view>
 
-          <view class="slider-box">
-            <slider
-              :min="1"
-              :max="99"
-              :value="lossValue"
-              :block-size="22"
-              active-color="#e64340"
-              background-color="#e5e5e5"
-              @changing="onSliderChange"
-            />
-            <view class="slider-labels">
-              <text>1%</text>
-              <text>50%</text>
-              <text>99%</text>
-            </view>
-          </view>
-
-          <view class="result-box">
-            <view class="result-tag">{{ currentDivination.gua }}</view>
-            <text class="result-text">{{ currentDivination.desc }}</text>
-          </view>
+        <view class="oracle-box">
+          <text class="oracle-title">卦象：{{ currentDivination.gua }}</text>
+          <text class="oracle-content">{{ currentDivination.desc }}</text>
         </view>
       </view>
 
-      <!-- 收益波动称号 -->
-      <view class="section-card">
-        <view class="card-title-bar">
-          <text class="card-title">🏆 收益波动称号</text>
+      <!-- 3. 收益波动称号 -->
+      <view class="talisman-card">
+        <view class="card-title">🏆 收益波动称号</view>
+
+        <view class="profit-labels">
+          <text class="profit-label val-green">亏损</text>
+          <text class="profit-label val-red">盈利</text>
         </view>
 
-        <view class="title-box">
-          <view class="profit-slider-wrap">
-            <view class="profit-labels">
-              <text class="profit-label loss-label">亏损</text>
-              <text class="profit-label gain-label">盈利</text>
-            </view>
-            <slider
-              :min="-99"
-              :max="99"
-              :value="profitValue"
-              :block-size="24"
-              active-color="#e64340"
-              background-color="#e5e5e5"
-              @changing="onProfitSliderChange"
-            />
-          </view>
+        <view class="slider-wrap">
+          <slider
+            :min="-99"
+            :max="99"
+            :value="profitValue"
+            :block-size="24"
+            active-color="#D4AF37"
+            background-color="#2B2B2B"
+            @changing="onProfitSliderChange"
+          />
+        </view>
 
-          <view class="title-result">
-            <view class="title-badge" :class="'level-' + currentTitle.level">
-              <text class="title-emoji">{{ currentTitle.emoji }}</text>
-              <text class="title-name">{{ currentTitle.name }}</text>
-            </view>
-            <text class="title-desc">{{ currentTitle.desc }}</text>
+        <view class="title-result" :class="'level-' + currentTitle.level">
+          <view class="title-badge">
+            <text class="title-emoji">{{ currentTitle.emoji }}</text>
+            <text class="title-name">{{ currentTitle.name }}</text>
           </view>
+          <text class="title-desc">{{ currentTitle.desc }}</text>
         </view>
       </view>
 
-      <!-- 3. 今日运势 -->
-      <view class="section-card">
-        <view class="card-title-bar">
-          <text class="card-title">🎋 今日运势</text>
-          <text class="card-extra">{{ fortuneUsed ? '已求签' : '可求签' }}</text>
-        </view>
+      <!-- 4. 灵签问吉凶 -->
+      <view class="talisman-card">
+        <view class="corner tl"></view>
+        <view class="corner tr"></view>
+        <view class="corner bl"></view>
+        <view class="corner br"></view>
 
-        <view class="fortune-box">
+        <view class="card-title">🧧 灵签问吉凶 🧧</view>
+
+        <view class="fortune-container">
           <!-- 签筒 -->
           <view
             v-if="!showFortune"
@@ -129,19 +122,17 @@
             :class="{ 'shaking': isShaking, 'disabled': fortuneUsed }"
             @tap="handleFortuneTap"
           >
-            <view class="qian-tong">
-              <text class="qian-icon">🎋</text>
-            </view>
-            <text class="qian-text">{{ isShaking ? '求签中...' : '点击求签' }}</text>
+            <text class="qiantong">🎋</text>
+            <text class="qiantong-tip">{{ isShaking ? '诚心祷告，灵签摇动中...' : (fortuneUsed ? '今日已求签' : '点击签筒，摇动求签') }}</text>
           </view>
 
           <!-- 签文 -->
-          <view v-if="showFortune" class="fortune-result">
-            <view class="fortune-header">
-              <text class="fortune-level" :class="fortuneLevelClass">{{ currentFortune.level }}</text>
+          <view v-if="showFortune" class="fortune-paper">
+            <view class="fortune-level" :class="fortuneLevelClass">{{ currentFortune.level }}</view>
+            <view class="fortune-content">
               <text class="fortune-poem">{{ currentFortune.poem }}</text>
+              <text class="fortune-desc">{{ currentFortune.desc }}</text>
             </view>
-            <text class="fortune-desc">{{ currentFortune.desc }}</text>
           </view>
         </view>
       </view>
@@ -150,30 +141,16 @@
       <view class="bottom-space"></view>
     </scroll-view>
 
-    <!-- 底部Tab栏 - 暂时隐藏 -->
-    <!-- <view class="tab-bar">
-      <view class="tab-item active">
-        <text class="tab-icon">🏠</text>
-        <text class="tab-text">首页</text>
-      </view>
-      <view class="tab-item">
-        <text class="tab-icon">📊</text>
-        <text class="tab-text">行情</text>
-      </view>
-      <view class="tab-item">
-        <text class="tab-icon">📝</text>
-        <text class="tab-text">交易</text>
-      </view>
-      <view class="tab-item">
-        <text class="tab-icon">👤</text>
-        <text class="tab-text">我的</text>
-      </view>
-    </view> -->
+    <!-- 底部经文 -->
+    <view class="sutra-scroll">
+      <text class="sutra-content">🙏 股市有风险，入市需谨慎 🙏 色即是空，空即是色，跌即是涨，涨即是跌 🙏 施主，回头是岸，苦海无边 🙏</text>
+    </view>
   </view>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app';
 
 // ============ 存储 ============
 const STORAGE_KEY_MERIT = 'zen_merit_count';
@@ -210,8 +187,8 @@ const handleMuyuTap = () => {
 
   const newParticle = {
     id: particleId++,
-    x: 100 + (Math.random() - 0.5) * 80,
-    y: 60
+    x: 160 + (Math.random() - 0.5) * 80,
+    y: 80
   };
   meritParticles.value.push(newParticle);
   setTimeout(() => {
@@ -281,13 +258,13 @@ const fortuneUsed = ref(false);
 const currentFortune = ref({ level: "", poem: "", desc: "" });
 
 const fortuneData = [
-  { level: "上上签", poem: "枯木逢春", desc: "枯木逢春犹再发，废纸或将变废为宝，切记拿住。" },
-  { level: "上吉", poem: "紫气东来", desc: "主力资金隐隐若现，这波能不能飞升，全看造化。" },
-  { level: "中吉", poem: "否极泰来", desc: "跌无可跌就是涨的开始，万一反弹了呢？" },
-  { level: "中平", poem: "静观其变", desc: "敌不动我不动，目前局势不明，建议回家睡觉。" },
-  { level: "下签", poem: "关灯吃面", desc: "今日大概率又是随礼的一天，记得多放葱花。" },
-  { level: "下下签", poem: "天雷滚滚", desc: "大凶！近日忌看盘，忌补仓，宜卸载软件保平安。" },
-  { level: "神签", poem: "相信国运", desc: "别问，问就是相信光，总能等到回本的那天。" }
+  { level: "上上签", poem: "枯木逢春", desc: "枯木逢春犹再发，施主手中废纸或将变废为宝，切记拿住，莫要下车。" },
+  { level: "上吉", poem: "紫气东来", desc: "主力资金隐隐若现，似有抬轿之意，这波能不能飞升，全看造化。" },
+  { level: "中吉", poem: "否极泰来", desc: "跌无可跌，也就是涨的开始。虽然现在很难受，但万一反弹了呢？" },
+  { level: "中平", poem: "静观其变", desc: "敌不动我不动，敌若动我乱动。目前局势不明，建议施主回家睡觉。" },
+  { level: "下签", poem: "关灯吃面", desc: "今日大概率又是随礼的一天，记得多放葱花，少放眼泪。" },
+  { level: "下下签", poem: "天雷滚滚", desc: "大凶之兆！印堂发黑，近日忌看盘，忌补仓，宜卸载软件保平安。" },
+  { level: "神签", poem: "相信国运", desc: "别问，问就是相信光。只要你活得够久，总能等到回本的那一天。" }
 ];
 
 const fortuneLevelClass = computed(() => {
@@ -332,88 +309,156 @@ const handleFortuneTap = () => {
     fortuneUsed.value = true;
     saveTodayFortune(fortune);
     uni.vibrateShort({ type: 'heavy' });
-  }, 1200);
+  }, 1500);
 };
 
 onMounted(() => {
   loadMerit();
   loadTodayFortune();
 });
+
+// ============ 分享配置 ============
+// 分享给朋友
+onShareAppMessage(() => {
+  return {
+    title: '修真渡劫院 - 今日诸事不宜',
+    path: '/pages/zen/index',
+    imageUrl: '/static/logo.png'
+  };
+});
+
+// 分享到朋友圈
+onShareTimeline(() => {
+  return {
+    title: '修真渡劫院 - 贫道夜观天象，今日诸事不宜',
+    query: '',
+    imageUrl: '/static/logo.png'
+  };
+});
 </script>
 
 <style lang="scss" scoped>
+/* 玄学色板 */
+$paper-bg: #F0E6D2;
+$paper-texture: #E6DBC4;
+$cinnabar: #C44238;
+$ink-black: #2B2B2B;
+$tao-gold: #D4AF37;
+$jade-green: #3E6B56;
+
 .app-page {
   min-height: 100vh;
   height: 100vh;
-  background: #f5f5f5;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+  background-color: $paper-bg;
+  background-image: radial-gradient($paper-texture 1px, transparent 1px);
+  background-size: 20rpx 20rpx;
+  position: relative;
+  font-family: "KaiTi", "STKaiti", "SimSun", serif;
 }
 
-/* 顶部导航 */
-.header {
-  background: linear-gradient(135deg, #e64340 0%, #c9382e 100%);
-  padding-top: 88rpx;
-  padding-bottom: 24rpx;
-  padding-left: 32rpx;
-  padding-right: 32rpx;
-  flex-shrink: 0;
-}
-
-.header-top {
+/* 八卦背景装饰 */
+.bagua-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600rpx;
+  height: 600rpx;
+  border: 40rpx solid rgba(0,0,0,0.03);
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
-.header-title {
-  font-size: 36rpx;
+.bagua-icon {
+  font-size: 300rpx;
+  opacity: 0.05;
+  animation: rotate 60s linear infinite;
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+/* 顶部牌匾 */
+.header {
+  padding: 120rpx 40rpx 40rpx;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.plaque {
+  display: inline-block;
+  border: 8rpx double $ink-black;
+  padding: 16rpx 48rpx;
+  background: $cinnabar;
+  color: #FFD700;
+  font-size: 48rpx;
   font-weight: bold;
-  color: #fff;
+  box-shadow: 8rpx 8rpx 0 rgba(43, 43, 43, 0.2);
+  letter-spacing: 8rpx;
+  border-radius: 8rpx;
+}
+
+.sub-plaque {
+  display: block;
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  color: $ink-black;
+  opacity: 0.7;
+  font-style: italic;
 }
 
 /* 滚动区 */
 .main-scroll {
-  flex: 1;
-  height: 0;
+  height: calc(100vh - 80rpx);
+  position: relative;
+  z-index: 1;
 }
 
-/* 卡片 */
-.section-card {
-  background: #fff;
-  margin: 20rpx 24rpx;
-  border-radius: 16rpx;
-  padding: 28rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+/* 通用符箓卡片 */
+.talisman-card {
+  background: #FFFBF0;
+  border: 4rpx solid $ink-black;
+  padding: 40rpx;
+  margin: 32rpx;
+  position: relative;
+  box-shadow: 8rpx 8rpx 0 rgba(43, 43, 43, 0.2);
 }
 
-.card-title-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24rpx;
-  padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+/* 四角装饰 */
+.corner {
+  position: absolute;
+  width: 20rpx;
+  height: 20rpx;
+  border: 4rpx solid $cinnabar;
 }
+.tl { top: 8rpx; left: 8rpx; border-right: none; border-bottom: none; }
+.tr { top: 8rpx; right: 8rpx; border-left: none; border-bottom: none; }
+.bl { bottom: 8rpx; left: 8rpx; border-right: none; border-top: none; }
+.br { bottom: 8rpx; right: 8rpx; border-left: none; border-top: none; }
 
 .card-title {
-  font-size: 30rpx;
+  font-size: 36rpx;
+  text-align: center;
+  border-bottom: 2rpx dashed $ink-black;
+  padding-bottom: 16rpx;
+  margin-bottom: 32rpx;
+  letter-spacing: 4rpx;
   font-weight: bold;
-  color: #333;
 }
 
-.card-extra {
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* 功德区域 */
-.merit-section {
-  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
-  position: relative;
-  overflow: hidden;
+/* 功德木鱼 */
+.muyu-section {
+  text-align: center;
+  padding: 40rpx;
+  background: radial-gradient(circle, #EFE5D0 0%, #FFFBF0 100%);
   cursor: pointer;
+  overflow: hidden;
 }
 
 .merit-header {
@@ -424,15 +469,17 @@ onMounted(() => {
   z-index: 1;
 }
 
-.merit-left {
+.merit-info {
   flex: 1;
+  text-align: left;
 }
 
 .merit-label {
-  font-size: 26rpx;
-  color: #666;
-  margin-bottom: 8rpx;
+  font-size: 28rpx;
+  color: $ink-black;
+  opacity: 0.7;
   display: block;
+  margin-bottom: 8rpx;
 }
 
 .merit-value-row {
@@ -442,38 +489,20 @@ onMounted(() => {
 }
 
 .merit-value {
-  font-size: 64rpx;
+  font-size: 72rpx;
   font-weight: bold;
-  color: #e64340;
-  font-family: 'DIN Alternate', 'Arial', sans-serif;
+  color: $cinnabar;
+  font-family: "Arial", sans-serif;
 }
 
 .merit-unit {
-  font-size: 26rpx;
-  color: #e64340;
+  font-size: 28rpx;
+  color: $cinnabar;
 }
 
-.merit-btn {
-  width: 140rpx;
-  height: 140rpx;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #ff6b6b 0%, #e64340 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(230, 67, 64, 0.3);
-  position: relative;
-  transition: transform 0.08s;
-
-  &.pressing {
-    transform: scale(0.9);
-  }
-}
-
-/* 小猫敲木鱼 */
 .cat-muyu-img {
-  width: 160rpx;
-  height: 160rpx;
+  width: 180rpx;
+  height: 180rpx;
   transition: transform 0.08s;
 
   &.pressing {
@@ -481,143 +510,94 @@ onMounted(() => {
   }
 }
 
-/* 大弹幕飘字 */
-.big-float {
+/* 功德+1 粒子动画 */
+.merit-particle {
   position: absolute;
-  color: #e64340;
-  font-size: 48rpx;
+  color: $cinnabar;
   font-weight: bold;
+  font-size: 40rpx;
   pointer-events: none;
-  animation: bigFloatUp 0.8s ease-out forwards;
+  animation: floatUpFade 0.8s ease-out forwards;
   z-index: 100;
-  text-shadow: 0 2rpx 8rpx rgba(230, 67, 64, 0.3);
 }
 
-@keyframes bigFloatUp {
+@keyframes floatUpFade {
   0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
-  20% { transform: translate(-50%, -30rpx) scale(1.3); opacity: 1; }
-  100% { transform: translate(-50%, -150rpx) scale(1); opacity: 0; }
+  20% { transform: translate(-50%, -40rpx) scale(1.2); opacity: 1; }
+  100% { transform: translate(-50%, -160rpx) scale(1); opacity: 0; }
 }
 
 .tap-hint {
   display: block;
-  text-align: center;
   font-size: 24rpx;
-  color: #999;
-  margin-top: 20rpx;
+  margin-top: 24rpx;
+  opacity: 0.6;
+  color: $ink-black;
 }
 
-/* 计算器 */
-.calc-box {
-  padding: 0 8rpx;
-}
-
-.calc-row {
+/* 历劫推演 */
+.result-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 20rpx 0;
+  margin-bottom: 24rpx;
 }
 
-.calc-item {
-  flex: 1;
+.result-item {
   text-align: center;
 }
 
-.calc-label {
+.result-label {
   display: block;
   font-size: 24rpx;
-  color: #999;
-  margin-bottom: 12rpx;
+  opacity: 0.6;
+  margin-bottom: 8rpx;
+  color: $ink-black;
 }
 
-.calc-num {
-  font-size: 48rpx;
+.result-val {
+  font-size: 40rpx;
   font-weight: bold;
-  font-family: 'DIN Alternate', 'Arial', sans-serif;
-
-  &.down { color: #07c160; }
-  &.up { color: #e64340; }
+  font-family: "Arial", sans-serif;
 }
 
-.calc-arrow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8rpx;
-  padding: 0 16rpx;
-}
+.val-red { color: $cinnabar; }
+.val-green { color: $jade-green; }
 
-.arrow-line {
-  width: 60rpx;
-  height: 1rpx;
-  background: #ddd;
-}
-
-.arrow-text {
-  font-size: 22rpx;
-  color: #999;
-  white-space: nowrap;
-}
-
-.slider-box {
+.slider-wrap {
   margin: 24rpx 0;
 }
 
-.slider-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 22rpx;
-  color: #999;
-  margin-top: 8rpx;
+.oracle-box {
+  background: rgba(196, 66, 56, 0.05);
+  border: 2rpx solid $cinnabar;
+  padding: 24rpx;
+  margin-top: 24rpx;
 }
 
-.result-box {
-  background: #fff8f8;
-  border-radius: 12rpx;
-  padding: 20rpx 24rpx;
-  margin-top: 16rpx;
-  border-left: 6rpx solid #e64340;
-}
-
-.result-tag {
-  display: inline-block;
-  background: #e64340;
-  color: #fff;
-  font-size: 22rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 4rpx;
+.oracle-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: $cinnabar;
   margin-bottom: 12rpx;
 }
 
-.result-text {
-  display: block;
-  font-size: 26rpx;
-  color: #666;
+.oracle-content {
+  font-size: 28rpx;
+  color: $ink-black;
   line-height: 1.6;
 }
 
 /* 收益波动称号 */
-.title-box {
-  padding: 0 8rpx;
-}
-
-.profit-slider-wrap {
-  margin: 16rpx 0;
-}
-
 .profit-labels {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12rpx;
+  margin-bottom: 8rpx;
 }
 
 .profit-label {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: bold;
-
-  &.loss-label { color: #07c160; }
-  &.gain-label { color: #e64340; }
 }
 
 .title-result {
@@ -626,72 +606,79 @@ onMounted(() => {
   align-items: center;
   margin-top: 32rpx;
   padding: 32rpx;
-  background: #fafafa;
-  border-radius: 16rpx;
+  border-radius: 12rpx;
+  border: 2rpx solid;
+
+  &.level-purple {
+    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    border-color: #8e44ad;
+    .title-emoji { font-size: 72rpx; }
+    .title-name { color: #fff; font-size: 44rpx; }
+    .title-desc { color: rgba(255,255,255,0.85); }
+  }
+  &.level-red {
+    background: linear-gradient(135deg, #e64340 0%, #c9382e 100%);
+    border-color: #c9382e;
+    .title-emoji { font-size: 68rpx; }
+    .title-name { color: #fff; font-size: 42rpx; }
+    .title-desc { color: rgba(255,255,255,0.85); }
+  }
+  &.level-orange {
+    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+    border-color: #ff6b00;
+    .title-emoji { font-size: 64rpx; }
+    .title-name { color: #fff; font-size: 40rpx; }
+    .title-desc { color: rgba(255,255,255,0.85); }
+  }
+  &.level-yellow {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border-color: #f59e0b;
+    .title-emoji { font-size: 60rpx; }
+    .title-name { color: #333; font-size: 38rpx; }
+    .title-desc { color: #666; }
+  }
+  &.level-green {
+    background: linear-gradient(135deg, #07c160 0%, #059a41 100%);
+    border-color: #059a41;
+    .title-emoji { font-size: 56rpx; }
+    .title-name { color: #fff; font-size: 36rpx; }
+    .title-desc { color: rgba(255,255,255,0.85); }
+  }
+  &.level-lightgreen {
+    background: linear-gradient(135deg, #52c41a 0%, #27ae60 100%);
+    border-color: #27ae60;
+    .title-emoji { font-size: 60rpx; }
+    .title-name { color: #fff; font-size: 38rpx; }
+    .title-desc { color: rgba(255,255,255,0.85); }
+  }
+  &.level-cyan {
+    background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
+    border-color: #0097a7;
+    .title-emoji { font-size: 64rpx; }
+    .title-name { color: #fff; font-size: 40rpx; }
+    .title-desc { color: rgba(255,255,255,0.85); }
+  }
+  &.level-blue {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    border-color: #1976d2;
+    .title-emoji { font-size: 68rpx; }
+    .title-name { color: #fff; font-size: 42rpx; }
+    .title-desc { color: rgba(255,255,255,0.85); }
+  }
+  &.level-gold {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    border-color: #ff9800;
+    box-shadow: 0 8rpx 24rpx rgba(255, 193, 7, 0.3);
+    .title-emoji { font-size: 72rpx; }
+    .title-name { color: #fff; font-size: 46rpx; text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2); }
+    .title-desc { color: rgba(255,255,255,0.9); }
+  }
 }
 
 .title-badge {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 20rpx 32rpx;
-  border-radius: 16rpx;
-
-  &.level-purple {
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-    .title-emoji { font-size: 64rpx; }
-    .title-name { color: #fff; font-size: 40rpx; font-weight: bold; }
-    .title-desc { color: rgba(255,255,255,0.85); }
-  }
-  &.level-red {
-    background: linear-gradient(135deg, #e64340 0%, #c9382e 100%);
-    .title-emoji { font-size: 60rpx; }
-    .title-name { color: #fff; font-size: 38rpx; font-weight: bold; }
-    .title-desc { color: rgba(255,255,255,0.85); }
-  }
-  &.level-orange {
-    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
-    .title-emoji { font-size: 56rpx; }
-    .title-name { color: #fff; font-size: 36rpx; font-weight: bold; }
-    .title-desc { color: rgba(255,255,255,0.85); }
-  }
-  &.level-yellow {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    .title-emoji { font-size: 52rpx; }
-    .title-name { color: #333; font-size: 34rpx; font-weight: bold; }
-    .title-desc { color: #666; }
-  }
-  &.level-green {
-    background: linear-gradient(135deg, #07c160 0%, #059a41 100%);
-    .title-emoji { font-size: 48rpx; }
-    .title-name { color: #fff; font-size: 32rpx; font-weight: bold; }
-    .title-desc { color: rgba(255,255,255,0.85); }
-  }
-  &.level-lightgreen {
-    background: linear-gradient(135deg, #52c41a 0%, #27ae60 100%);
-    .title-emoji { font-size: 52rpx; }
-    .title-name { color: #fff; font-size: 34rpx; font-weight: bold; }
-    .title-desc { color: rgba(255,255,255,0.85); }
-  }
-  &.level-cyan {
-    background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%);
-    .title-emoji { font-size: 56rpx; }
-    .title-name { color: #fff; font-size: 36rpx; font-weight: bold; }
-    .title-desc { color: rgba(255,255,255,0.85); }
-  }
-  &.level-blue {
-    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-    .title-emoji { font-size: 60rpx; }
-    .title-name { color: #fff; font-size: 38rpx; font-weight: bold; }
-    .title-desc { color: rgba(255,255,255,0.85); }
-  }
-  &.level-gold {
-    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
-    box-shadow: 0 8rpx 24rpx rgba(255, 193, 7, 0.3);
-    .title-emoji { font-size: 64rpx; }
-    .title-name { color: #fff; font-size: 42rpx; font-weight: bold; text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.2); }
-    .title-desc { color: rgba(255,255,255,0.9); }
-  }
 }
 
 .title-emoji {
@@ -699,155 +686,138 @@ onMounted(() => {
 }
 
 .title-name {
-  display: block;
+  font-weight: bold;
 }
 
 .title-desc {
   font-size: 24rpx;
   margin-top: 16rpx;
   text-align: center;
-  display: block;
 }
 
 /* 灵签 */
-.fortune-box {
-  min-height: 200rpx;
+.fortune-container {
+  min-height: 280rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .qian-area {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40rpx 0;
-  transition: opacity 0.2s;
 
   &.disabled { opacity: 0.5; }
 }
 
-.qian-tong {
-  width: 120rpx;
-  height: 160rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.qiantong {
+  font-size: 160rpx;
   transition: transform 0.2s;
 }
 
-.qian-icon {
-  font-size: 100rpx;
-}
-
-.qian-area:not(.disabled):active .qian-icon {
+.qian-area:not(.disabled):active .qiantong {
   transform: scale(0.9);
 }
 
-.shaking .qian-icon {
-  animation: shake 0.3s ease-in-out infinite;
+.shaking .qiantong {
+  animation: shakeHard 0.3s ease-in-out infinite;
 }
 
-@keyframes shake {
-  0%, 100% { transform: rotate(-10deg); }
-  50% { transform: rotate(10deg); }
+@keyframes shakeHard {
+  10%, 90% { transform: translateX(-4rpx) rotate(-5deg); }
+  20%, 80% { transform: translateX(8rpx) rotate(5deg); }
+  30%, 50%, 70% { transform: translateX(-16rpx) rotate(-10deg); }
+  40%, 60% { transform: translateX(16rpx) rotate(10deg); }
 }
 
-.qian-text {
+.qiantong-tip {
   margin-top: 16rpx;
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: #666;
 }
 
-.fortune-result {
-  background: linear-gradient(135deg, #fffbf0 0%, #fff 100%);
-  border-radius: 12rpx;
-  padding: 28rpx;
-  border: 1rpx solid #ffe0b0;
-  animation: fadeIn 0.4s ease;
+.fortune-paper {
+  width: 100%;
+  background: #FFF;
+  border: 4rpx solid $cinnabar;
+  box-shadow: 0 10rpx 30rpx rgba(0,0,0,0.1);
+  padding: 24rpx;
+  animation: slideDown 0.5s ease-out;
+  display: flex;
+  flex-direction: row;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16rpx); }
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-40rpx); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.fortune-header {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  margin-bottom: 16rpx;
+.fortune-level {
+  writing-mode: vertical-rl;
+  font-size: 36rpx;
+  font-weight: bold;
+  border-left: 4rpx double $cinnabar;
+  padding-left: 16rpx;
+  height: 160rpx;
+  margin-left: 20rpx;
+  letter-spacing: 8rpx;
+
+  &.level-best { color: #ff6b00; }
+  &.level-good { color: $cinnabar; }
+  &.level-medium { color: #ff9500; }
+  &.level-bad { color: $jade-green; }
 }
 
-.fortune-level {
-  font-size: 28rpx;
-  font-weight: bold;
-  padding: 8rpx 20rpx;
-  border-radius: 8rpx;
-
-  &.level-best {
-    color: #ff6b00;
-    background: rgba(255, 107, 0, 0.1);
-  }
-  &.level-good {
-    color: #e64340;
-    background: rgba(230, 67, 64, 0.1);
-  }
-  &.level-medium {
-    color: #ff9500;
-    background: rgba(255, 149, 0, 0.1);
-  }
-  &.level-bad {
-    color: #07c160;
-    background: rgba(7, 193, 96, 0.1);
-  }
+.fortune-content {
+  flex: 1;
 }
 
 .fortune-poem {
+  display: block;
   font-size: 32rpx;
   font-weight: bold;
-  color: #333;
+  color: $ink-black;
+  margin-bottom: 16rpx;
 }
 
 .fortune-desc {
   font-size: 26rpx;
   color: #666;
   line-height: 1.6;
+  border-top: 2rpx dashed #ccc;
+  padding-top: 16rpx;
 }
 
 /* 底部 */
 .bottom-space {
-  height: 120rpx;
+  height: 200rpx;
 }
 
-.tab-bar {
+/* 底部经文 */
+.sutra-scroll {
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-  height: 100rpx;
-  background: #fff;
-  display: flex;
-  border-top: 1rpx solid #eee;
-  padding-bottom: env(safe-area-inset-bottom);
+  width: 100%;
+  background: $ink-black;
+  color: $tao-gold;
+  padding: 16rpx 0;
+  font-size: 24rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  border-top: 4rpx solid $tao-gold;
+  z-index: 10;
 }
 
-.tab-item {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6rpx;
-
-  &.active .tab-text {
-    color: #e64340;
-  }
+.sutra-content {
+  display: inline-block;
+  animation: scrollText 20s linear infinite;
 }
 
-.tab-icon {
-  font-size: 40rpx;
-}
-
-.tab-text {
-  font-size: 22rpx;
-  color: #999;
+@keyframes scrollText {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
 }
 </style>
