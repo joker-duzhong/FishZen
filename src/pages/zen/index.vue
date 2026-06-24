@@ -167,6 +167,22 @@ const isPressing = ref(false);
 const meritParticles = ref<{ id: number; x: number; y: number }[]>([]);
 let particleId = 0;
 
+// 音频上下文
+let knockAudio: any = null;
+
+const initAudio = () => {
+  if (!knockAudio) {
+    knockAudio = uni.createInnerAudioContext();
+    knockAudio.src = '/static/knock.mp3';
+    knockAudio.autoplay = false;
+    knockAudio.obeyMuteSwitch = false; // iOS静音模式下也播放
+
+    knockAudio.onError((err: any) => {
+      console.error('音频播放错误:', err);
+    });
+  }
+};
+
 const loadMerit = () => {
   try {
     const saved = uni.getStorageSync(STORAGE_KEY_MERIT);
@@ -184,6 +200,20 @@ const handleMuyuTap = () => {
   isPressing.value = true;
   setTimeout(() => { isPressing.value = false; }, 80);
   uni.vibrateShort({ type: 'light' });
+
+  // 播放敲击音效 - 先停止再播放，实现打断效果
+  try {
+    if (!knockAudio) {
+      initAudio();
+    }
+    if (knockAudio) {
+      knockAudio.stop();
+      knockAudio.seek(0);
+      knockAudio.play();
+    }
+  } catch (e) {
+    console.error('播放音频失败:', e);
+  }
 
   const newParticle = {
     id: particleId++,
@@ -315,6 +345,7 @@ const handleFortuneTap = () => {
 onMounted(() => {
   loadMerit();
   loadTodayFortune();
+  initAudio();
 });
 
 // ============ 分享配置 ============
